@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Cat, Heart, Info, Star } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { Cat, Heart, Info, Star, Paw, ArrowLeft, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 const catImages = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg",
@@ -11,9 +12,35 @@ const catImages = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Kittyply_edit1.jpg/1200px-Kittyply_edit1.jpg",
 ];
 
+const catFacts = [
+  "Cats can jump up to six times their length.",
+  "A cat's hearing is better than a dog's.",
+  "Cats have over 20 vocalizations, including the purr, meow, and chirp.",
+  "The first cat in space was French. She was named Felicette.",
+  "Cats spend 70% of their lives sleeping.",
+];
+
 const Index = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [likes, setLikes] = useState(0);
+  const [factIndex, setFactIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((oldProgress) => {
+        if (oldProgress === 100) {
+          setFactIndex((prevIndex) => (prevIndex + 1) % catFacts.length);
+          return 0;
+        }
+        return Math.min(oldProgress + 1, 100);
+      });
+    }, 50);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % catImages.length);
@@ -25,7 +52,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 p-8">
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-4xl mx-auto shadow-lg">
         <CardHeader>
           <div className="flex items-center justify-center mb-4">
             <motion.div
@@ -44,17 +71,24 @@ const Index = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="relative">
-            <img
-              src={catImages[currentImageIndex]}
-              alt="A cute cat"
-              className="mx-auto object-cover w-full h-[400px] rounded-lg"
-            />
+          <div className="relative overflow-hidden rounded-lg">
+            <AnimatePresence initial={false}>
+              <motion.img
+                key={currentImageIndex}
+                src={catImages[currentImageIndex]}
+                alt="A cute cat"
+                className="mx-auto object-cover w-full h-[400px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              />
+            </AnimatePresence>
             <Button variant="outline" className="absolute left-2 top-1/2 transform -translate-y-1/2" onClick={prevImage}>
-              ←
+              <ArrowLeft className="h-4 w-4" />
             </Button>
             <Button variant="outline" className="absolute right-2 top-1/2 transform -translate-y-1/2" onClick={nextImage}>
-              →
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
           
@@ -87,12 +121,28 @@ const Index = () => {
               </ul>
             </TabsContent>
           </Tabs>
+
+          <div className="bg-purple-100 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2 flex items-center">
+              <Paw className="h-5 w-5 mr-2 text-purple-500" />
+              Cat Fact of the Moment
+            </h3>
+            <p className="text-gray-700">{catFacts[factIndex]}</p>
+            <Progress value={progress} className="mt-2" />
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <Button variant="outline" onClick={() => setLikes(likes + 1)}>
             <Heart className={`mr-2 h-4 w-4 ${likes > 0 ? 'text-red-500 fill-red-500' : ''}`} /> Like
           </Button>
-          <span className="text-sm text-gray-500">{likes} people love cats!</span>
+          <motion.span 
+            key={likes}
+            initial={{ scale: 1.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-sm text-gray-500"
+          >
+            {likes} people love cats!
+          </motion.span>
         </CardFooter>
       </Card>
     </div>
