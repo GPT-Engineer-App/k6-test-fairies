@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Star, Paw, ArrowLeft, ArrowRight, Sparkles, Zap } from "lucide-react";
+import { Cat, Heart, Info, Star, Paw, ArrowLeft, ArrowRight, Sparkles, Zap, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 
 const catImages = [
   { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg", caption: "Curious Tabby" },
@@ -44,6 +47,8 @@ const Index = () => {
   const [progress, setProgress] = useState(0);
   const [selectedBreed, setSelectedBreed] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [catHappiness, setCatHappiness] = useState(50);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -76,8 +81,28 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 p-8">
-      <Card className="max-w-4xl mx-auto shadow-lg">
+    <div className={`min-h-screen p-8 transition-colors duration-300 ${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-purple-900 text-white' : 'bg-gradient-to-br from-purple-100 to-pink-100'}`}>
+      <div className="flex justify-end mb-4">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center space-x-2">
+                <Sun className="h-4 w-4" />
+                <Switch
+                  checked={isDarkMode}
+                  onCheckedChange={setIsDarkMode}
+                  className="data-[state=checked]:bg-purple-700"
+                />
+                <Moon className="h-4 w-4" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle dark mode</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      <Card className={`max-w-4xl mx-auto shadow-lg ${isDarkMode ? 'bg-gray-800 text-white' : ''}`}>
         <CardHeader>
           <div className="flex items-center justify-center mb-4">
             <motion.div
@@ -96,7 +121,7 @@ const Index = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Carousel className="w-full max-w-xs mx-auto">
+          <Carousel className="w-full max-w-md mx-auto">
             <CarouselContent>
               {catImages.map((image, index) => (
                 <CarouselItem key={index}>
@@ -115,11 +140,12 @@ const Index = () => {
           </Carousel>
           
           <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="characteristics">Characteristics</TabsTrigger>
+              <TabsTrigger value="characteristics">Traits</TabsTrigger>
               <TabsTrigger value="funfacts">Fun Facts</TabsTrigger>
               <TabsTrigger value="breeds">Breeds</TabsTrigger>
+              <TabsTrigger value="caretips">Care Tips</TabsTrigger>
             </TabsList>
             <TabsContent value="about">
               <motion.p 
@@ -170,12 +196,12 @@ const Index = () => {
                 {catBreeds.map((breed, index) => (
                   <motion.div
                     key={index}
-                    className="bg-white p-4 rounded-lg shadow-md cursor-pointer"
+                    className={`p-4 rounded-lg shadow-md cursor-pointer ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}
                     whileHover={{ scale: 1.05 }}
                     onClick={() => setSelectedBreed(breed)}
                   >
                     <h3 className="font-bold text-lg">{breed.name}</h3>
-                    <p className="text-sm text-gray-600">Origin: {breed.origin}</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Origin: {breed.origin}</p>
                   </motion.div>
                 ))}
               </div>
@@ -183,7 +209,7 @@ const Index = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 p-4 bg-purple-100 rounded-lg"
+                  className={`mt-4 p-4 rounded-lg ${isDarkMode ? 'bg-purple-900' : 'bg-purple-100'}`}
                 >
                   <h3 className="font-bold text-lg">{selectedBreed.name}</h3>
                   <p>Origin: {selectedBreed.origin}</p>
@@ -191,10 +217,37 @@ const Index = () => {
                 </motion.div>
               )}
             </TabsContent>
+            <TabsContent value="caretips">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Essential Cat Care Tips</h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Provide a balanced diet suitable for your cat's age and health</li>
+                  <li>Ensure fresh water is always available</li>
+                  <li>Regular grooming to keep their coat healthy</li>
+                  <li>Provide a clean litter box and scoop daily</li>
+                  <li>Regular vet check-ups and vaccinations</li>
+                  <li>Offer plenty of playtime and mental stimulation</li>
+                </ul>
+                <div className="mt-4">
+                  <Label htmlFor="cat-happiness" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Cat Happiness Meter
+                  </Label>
+                  <Slider
+                    id="cat-happiness"
+                    max={100}
+                    step={1}
+                    className="mt-2"
+                    value={[catHappiness]}
+                    onValueChange={(value) => setCatHappiness(value[0])}
+                  />
+                  <p className="text-sm mt-2">Your cat's happiness level: {catHappiness}%</p>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
 
           <motion.div 
-            className="bg-purple-100 p-4 rounded-lg"
+            className={`p-4 rounded-lg ${isDarkMode ? 'bg-purple-900' : 'bg-purple-100'}`}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
@@ -203,7 +256,7 @@ const Index = () => {
               <Paw className="h-5 w-5 mr-2 text-purple-500" />
               Cat Fact of the Moment
             </h3>
-            <p className="text-gray-700">{catFacts[factIndex]}</p>
+            <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{catFacts[factIndex]}</p>
             <Progress value={progress} className="mt-2" />
           </motion.div>
         </CardContent>
