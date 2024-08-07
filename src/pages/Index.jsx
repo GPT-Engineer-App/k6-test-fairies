@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Star, Paw, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Cat, Heart, Info, Star, Paw, ArrowLeft, ArrowRight, Sparkles, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const catImages = [
   { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg", caption: "Curious Tabby" },
@@ -41,6 +43,7 @@ const Index = () => {
   const [factIndex, setFactIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [selectedBreed, setSelectedBreed] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -66,6 +69,12 @@ const Index = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + catImages.length) % catImages.length);
   };
 
+  const handleLike = () => {
+    setLikes(likes + 1);
+    setShowAlert(true);
+    setTimeout(() => setShowAlert(false), 3000);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 p-8">
       <Card className="max-w-4xl mx-auto shadow-lg">
@@ -87,34 +96,23 @@ const Index = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="relative overflow-hidden rounded-lg">
-            <AnimatePresence initial={false}>
-              <motion.img
-                key={currentImageIndex}
-                src={catImages[currentImageIndex].url}
-                alt={catImages[currentImageIndex].caption}
-                className="mx-auto object-cover w-full h-[400px]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-              />
-            </AnimatePresence>
-            <Button variant="outline" className="absolute left-2 top-1/2 transform -translate-y-1/2" onClick={prevImage}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" className="absolute right-2 top-1/2 transform -translate-y-1/2" onClick={nextImage}>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full"
-            >
-              {catImages[currentImageIndex].caption}
-            </motion.div>
-          </div>
+          <Carousel className="w-full max-w-xs mx-auto">
+            <CarouselContent>
+              {catImages.map((image, index) => (
+                <CarouselItem key={index}>
+                  <div className="p-1">
+                    <Card>
+                      <CardContent className="flex aspect-square items-center justify-center p-6">
+                        <img src={image.url} alt={image.caption} className="w-full h-full object-cover rounded-lg" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
           
           <Tabs defaultValue="about" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
@@ -124,17 +122,32 @@ const Index = () => {
               <TabsTrigger value="breeds">Breeds</TabsTrigger>
             </TabsList>
             <TabsContent value="about">
-              <p className="text-lg text-gray-700">
+              <motion.p 
+                className="text-lg text-gray-700"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
                 Cats are fascinating creatures that have been domesticated for thousands of years. They are known for their independence, agility, and affectionate nature. With their playful antics and soothing purrs, cats have captured the hearts of millions around the world.
-              </p>
+              </motion.p>
             </TabsContent>
             <TabsContent value="characteristics">
               <ul className="list-none text-gray-700 space-y-2">
-                <li className="flex items-center"><Star className="h-5 w-5 text-yellow-500 mr-2" /> Excellent hunters with sharp claws and teeth</li>
-                <li className="flex items-center"><Star className="h-5 w-5 text-yellow-500 mr-2" /> Flexible bodies and quick reflexes</li>
-                <li className="flex items-center"><Star className="h-5 w-5 text-yellow-500 mr-2" /> Keen senses, especially hearing and night vision</li>
-                <li className="flex items-center"><Star className="h-5 w-5 text-yellow-500 mr-2" /> Soft fur and a variety of coat colors and patterns</li>
-                <li className="flex items-center"><Star className="h-5 w-5 text-yellow-500 mr-2" /> Independent yet capable of forming strong bonds with humans</li>
+                {["Excellent hunters with sharp claws and teeth", 
+                  "Flexible bodies and quick reflexes", 
+                  "Keen senses, especially hearing and night vision", 
+                  "Soft fur and a variety of coat colors and patterns", 
+                  "Independent yet capable of forming strong bonds with humans"].map((characteristic, index) => (
+                  <motion.li 
+                    key={index}
+                    className="flex items-center"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Star className="h-5 w-5 text-yellow-500 mr-2" /> {characteristic}
+                  </motion.li>
+                ))}
               </ul>
             </TabsContent>
             <TabsContent value="funfacts">
@@ -180,20 +193,25 @@ const Index = () => {
             </TabsContent>
           </Tabs>
 
-          <div className="bg-purple-100 p-4 rounded-lg">
+          <motion.div 
+            className="bg-purple-100 p-4 rounded-lg"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
             <h3 className="text-lg font-semibold mb-2 flex items-center">
               <Paw className="h-5 w-5 mr-2 text-purple-500" />
               Cat Fact of the Moment
             </h3>
             <p className="text-gray-700">{catFacts[factIndex]}</p>
             <Progress value={progress} className="mt-2" />
-          </div>
+          </motion.div>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" onClick={() => setLikes(likes + 1)}>
+                <Button variant="outline" onClick={handleLike}>
                   <Heart className={`mr-2 h-4 w-4 ${likes > 0 ? 'text-red-500 fill-red-500' : ''}`} /> Like
                 </Button>
               </TooltipTrigger>
@@ -224,8 +242,8 @@ const Index = () => {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="lg" className="rounded-full">
-                <Sparkles className="h-6 w-6" />
+              <Button size="lg" className="rounded-full bg-gradient-to-r from-purple-400 to-pink-600 text-white">
+                <Zap className="h-6 w-6" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -234,6 +252,24 @@ const Index = () => {
           </Tooltip>
         </TooltipProvider>
       </motion.div>
+      <AnimatePresence>
+        {showAlert && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-4 left-4"
+          >
+            <Alert>
+              <Sparkles className="h-4 w-4" />
+              <AlertTitle>Thank you for your love!</AlertTitle>
+              <AlertDescription>
+                Your like has been added to the cat appreciation counter.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
